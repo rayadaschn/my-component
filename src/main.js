@@ -5,7 +5,6 @@ import App from "./App.vue";
 import { createPinia } from "./store/pinia";
 const pinia = createPinia();
 
-console.log(pinia);
 const app = createApp(App);
 
 app.use(pinia);

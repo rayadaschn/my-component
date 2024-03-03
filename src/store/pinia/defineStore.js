@@ -1,4 +1,11 @@
-import { effectScope, inject, isReactive, isRef, reactive } from "vue";
+import {
+  computed,
+  effectScope,
+  inject,
+  isReactive,
+  isRef,
+  reactive,
+} from "vue";
 import { formatArgs, isComputed, isFunction } from "./utils";
 import { piniaSymbol } from "./constant";
 
@@ -9,6 +16,7 @@ export default function defineStore(...args) {
   const useStore = () => {
     const pinia = inject(piniaSymbol); // 获取 createPinia 所创建的 pinia 对象
 
+    // 查看是否已经注册该 store
     if (!pinia.store.has(id)) {
       if (isSetup) {
         createSetupStore(pinia, id, setup);
@@ -44,6 +52,7 @@ function createOptions(pinia, id, options) {
    */
   const store = reactive({});
   let storeScope;
+
   const result = pinia.scope.run(() => {
     storeScope = effectScope();
     return storeScope.run(() => compileOptions(pinia, store, id, options));
@@ -54,6 +63,7 @@ function createOptions(pinia, id, options) {
 
 function setStore(pinia, store, id, result) {
   pinia.store.set(id, store);
+  store.$id = id; // 给 store 增加一个 $id 属性, 为后续方法做铺垫
   Object.assign(store, result);
 
   return store;
@@ -90,6 +100,45 @@ function compileOptions(pinia, store, id, options) {
   };
 }
 
-function createStoreState(pinia, id, state) {}
-function createStoreGetters(store, getters) {}
-function createStoreActions(store, actions) {}
+function createStoreState(pinia, id, state) {
+  // state : () => {}
+  return (pinia.state.value[id] = state ? state() : {});
+}
+
+function createStoreGetters(store, getters) {
+  /**
+   * getters: {
+   *  count: () => {
+   *    return this.todoList.length
+   *  }
+   * }
+   *
+   * 最终需要结果为 { count: computed(() => count.call(store)) }
+   */
+
+  // keys 遍历出来的是数组 ['count', 'others']
+  return Object.keys(getters || {}).reduce((wrapper, getterName) => {
+    wrapper[getterName] = computed(() => getters[getterName].call(store));
+    return wrapper;
+  }, {});
+}
+
+function createStoreActions(store, actions) {
+  /**
+   * action: {
+      addTodo(todo) {
+        this.todoList.unshift(todo);
+      },
+      toggleTodo(id) {...},
+      removeTodo(id) {...},
+    },
+   */
+  const storeActions = {};
+  for (const actionName in actions) {
+    storeActions[actionName] = function () {
+      // apply(context, [...])
+      actions[actionName].apply(store, arguments);
+    };
+  }
+  return storeActions;
+}

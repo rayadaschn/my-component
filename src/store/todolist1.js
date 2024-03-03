@@ -11,7 +11,7 @@ export default defineStore("todolist1", {
       return this.todoList.length;
     },
   },
-  action: {
+  actions: {
     addTodo(todo) {
       this.todoList.unshift(todo);
     },

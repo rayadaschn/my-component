@@ -25,12 +25,10 @@
 
 <script setup>
 import { ref } from "vue";
-// import useTodoListStore from "../../store/todolist1";
-import useTodoListStore from "../../store/todolist2";
+import useTodoListStore from "../../store/todolist1";
+// import useTodoListStore from "../../store/todolist2";
 
 const store = useTodoListStore();
-
-console.log("store", store);
 
 const todoText = ref("");
 const addTodo = () => {
@@ -46,5 +44,3 @@ const addTodo = () => {
   todoText.value = "";
 };
 </script>
-
-<style lang="scss" scoped></style>
