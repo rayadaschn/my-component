@@ -1,6 +1,11 @@
 <template>
   <div>
     <div>
+      <div>number: {{ store.number }}</div>
+      <button @click="changeNumber">ADD</button>
+      <button @click="resetState">reset</button>
+    </div>
+    <div>
       <input type="text" v-model="todoText" />
       <button @click="addTodo">ADD</button>
       <p>共{{ store.count }}条</p>
@@ -43,4 +48,35 @@ const addTodo = () => {
   store.addTodo(todo);
   todoText.value = "";
 };
+
+const changeNumber = () => {
+  // store.$patch({
+  //   number: 500,
+  // });
+
+  store.$patch((state) => {
+    state.number = 600;
+  });
+};
+
+const resetState = () => {
+  store.$reset();
+};
+
+store.$subscribe((info, state) => {
+  console.log("info", info);
+  console.log("state", state);
+});
+
+store.$onAction(({ after, onError }) => {
+  console.log("before", store.todoList);
+
+  after(() => {
+    console.log("after", store.todoList);
+  });
+
+  onError((err) => {
+    console.log("error", err);
+  });
+});
 </script>

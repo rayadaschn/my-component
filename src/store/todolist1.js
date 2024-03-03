@@ -4,6 +4,7 @@ export default defineStore("todolist1", {
   state: () => {
     return {
       todoList: [],
+      number: 0,
     };
   },
   getters: {
@@ -16,6 +17,8 @@ export default defineStore("todolist1", {
       this.todoList.unshift(todo);
     },
     toggleTodo(id) {
+      throw new Error("反转失败");
+
       this.todoList = this.todoList.map((todo) => {
         if (todo.id === id) {
           todo.completed = !todo.completed;
@@ -25,6 +28,9 @@ export default defineStore("todolist1", {
     },
     removeTodo(id) {
       this.todoList = this.todoList.filter((todo) => todo.id !== id);
+    },
+    addNumber() {
+      this.number = this.number + 1;
     },
   },
 });

@@ -5,9 +5,19 @@ import {
   isReactive,
   isRef,
   reactive,
+  toRefs,
 } from "vue";
-import { formatArgs, isComputed, isFunction } from "./utils";
+import { formatArgs, isComputed, isFunction, subscription } from "./utils";
 import { piniaSymbol } from "./constant";
+import {
+  createPatch,
+  createReset,
+  createSubscribe,
+  createOnAction,
+  actionList,
+} from "./api";
+
+console.log("subscription", subscription);
 
 export default function defineStore(...args) {
   const { id, options, setup } = formatArgs(args);
@@ -34,12 +44,13 @@ export default function defineStore(...args) {
 
 function createSetupStore(pinia, id, setup) {
   const setupStore = setup();
-  const store = reactive({});
 
-  let storeScope;
+  let storeScope, store;
 
   const result = pinia.scope.run(() => {
     storeScope = effectScope();
+    store = reactive(createApis(pinia, id, storeScope)); // 增加 $patch 方法, 以替换初始 {}
+
     return storeScope.run(() => compliedSetup(pinia, id, setupStore));
   });
 
@@ -50,20 +61,25 @@ function createOptions(pinia, id, options) {
   /**
    * options: state getters, actions
    */
-  const store = reactive({});
-  let storeScope;
+  let storeScope, store;
 
   const result = pinia.scope.run(() => {
     storeScope = effectScope();
+    store = reactive(createApis(pinia, id, storeScope)); // 增加 $patch 方法, 以替换初始 {}
+
     return storeScope.run(() => compileOptions(pinia, store, id, options));
   });
 
-  return setStore(pinia, store, id, result);
+  return setStore(pinia, store, id, result, options.state);
 }
 
-function setStore(pinia, store, id, result) {
+function setStore(pinia, store, id, result, state) {
   pinia.store.set(id, store);
   store.$id = id; // 给 store 增加一个 $id 属性, 为后续方法做铺垫
+
+  // options 模式下多追加了一个参数 state
+  state && (store.$reset = createReset(store, state));
+
   Object.assign(store, result);
 
   return store;
@@ -102,7 +118,11 @@ function compileOptions(pinia, store, id, options) {
 
 function createStoreState(pinia, id, state) {
   // state : () => {}
-  return (pinia.state.value[id] = state ? state() : {});
+  // return (pinia.state.value[id] = state ? state() : {});
+
+  pinia.state.value[id] = state ? state() : {};
+  // 用 ref 进行包装
+  return toRefs(pinia.state.value[id]);
 }
 
 function createStoreGetters(store, getters) {
@@ -136,9 +156,52 @@ function createStoreActions(store, actions) {
   const storeActions = {};
   for (const actionName in actions) {
     storeActions[actionName] = function () {
-      // apply(context, [...])
-      actions[actionName].apply(store, arguments);
+      const afterList = [];
+      const errorList = [];
+      let res;
+      // 新增发布订阅
+      subscription.trigger(actionList, { after, onError });
+
+      try {
+        // apply(context, [...])
+        res = actions[actionName].apply(store, arguments);
+      } catch (error) {
+        subscription.trigger(errorList, error);
+      }
+
+      // 异步判断
+      if (res instanceof Promise) {
+        return res
+          .then((result) => {
+            return subscription.trigger(afterList, result);
+          })
+          .catch((e) => {
+            subscription.trigger(errorList, e);
+            return Promise.reject(e);
+          });
+      }
+
+      subscription.trigger(afterList, res);
+      return res;
+
+      function after(cb) {
+        afterList.push(cb);
+      }
+      function onError(cb) {
+        errorList.push(cb);
+      }
     };
   }
   return storeActions;
+}
+
+/**
+ * store.subscribe(({storeId}, state) => {})
+ */
+function createApis(pinia, id, scope) {
+  return {
+    $patch: createPatch(pinia, id),
+    $subscribe: createSubscribe(pinia, id, scope),
+    $onAction: createOnAction(),
+  };
 }
