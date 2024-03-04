@@ -52,7 +52,7 @@ export default abstract class BaseDrawTools {
     this.ctxBackup.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  getClientPostion(e: MouseEvent) {
+  getClientPosition(e: MouseEvent) {
     return {
       clientX:
         e.clientX -
@@ -76,7 +76,7 @@ export default abstract class BaseDrawTools {
       this.ctxBackup.strokeStyle = this.color;
       this.ctxBackup.lineWidth = this.size;
       e = e || window.event;
-      const { clientX, clientY } = this.getClientPostion(e);
+      const { clientX, clientY } = this.getClientPosition(e);
       startX = clientX;
       startY = clientY;
       this.ctxBackup.moveTo(clientX, clientY);
@@ -157,7 +157,7 @@ export default abstract class BaseDrawTools {
     img.src = imageSrc;
   }
 
-  output(format?: "png" | "jpeg" | "webp") {
+  output(format: "png" | "jpeg" | "webp") {
     const a = document.createElement("a");
     const ext = format || "webp";
     a.href = this.canvas.toDataURL(`image/${ext}`, 1);
@@ -175,6 +175,11 @@ export default abstract class BaseDrawTools {
     }
     a.download = `drawing.${ext}`;
     a.click();
+  }
+
+  getImgUrl(format: "png" | "webp" = "png") {
+    const url = this.canvas.toDataURL(`image/${format}`, 1);
+    return url;
   }
 
   abstract draw(): {

@@ -13,7 +13,7 @@ export default class Graffiti extends BaseDrawTools {
     return {
       onmousedown: noop,
       onmousemove: (e: MouseEvent) => {
-        const { clientX: x, clientY: y } = this.getClientPostion(e);
+        const { clientX: x, clientY: y } = this.getClientPosition(e);
         if (this.canDraw) {
           this.ctxBackup.beginPath();
           this.ctxBackup.strokeStyle = this.color;

@@ -13,7 +13,7 @@ export default class DND extends BaseDrawTools {
 
   handleDrop = (e: DragEvent) => {
     this.handleDragOver(e);
-    const files = e.dataTransfer?.files || [];
+    const files = e.dataTransfer?.files || ([] as []);
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       const t = f.type ? f.type : "n/a";

@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from "vue";
-import PenSize from "./PenSize.vue";
+import PenSize from "./Pensize.vue";
 import Color from "./Color.vue";
 import Clear from "./Clear.vue";
 import Output from "./Output.vue";
@@ -45,12 +45,30 @@ const state = reactive({
 state.currentTools?.clearContext(true);
 state.currentTools.enable();
 
-// state.currentTools.drawImage("../assets/drawing.png", {
-//   sx: 0,
-//   sy: 0,
-//   dx: 0,
-//   dy: 0,
-// });
+/** 手动添加绘制图片 */
+const addImg = (src) => {
+  const image = new Image();
+  image.src = "src";
+
+  image.onerror = (err) => {
+    console.log(err);
+  };
+
+  image.onload = function () {
+    const ctx = props.canvas.getContext("2d");
+    ctx.drawImage(
+      image,
+      0,
+      0,
+      image.width,
+      image.height,
+      0,
+      0,
+      props.canvas.width,
+      props.canvas.height
+    );
+  };
+};
 
 const enable = (currentTools) => {
   // 关闭其它模式

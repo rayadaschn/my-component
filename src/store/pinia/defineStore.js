@@ -17,7 +17,7 @@ import {
   actionList,
 } from "./api";
 
-console.log("subscription", subscription);
+// console.log("subscription", subscription);
 
 export default function defineStore(...args) {
   const { id, options, setup } = formatArgs(args);
@@ -155,11 +155,15 @@ function createStoreActions(store, actions) {
    */
   const storeActions = {};
   for (const actionName in actions) {
+    // 储存 action, 并修改 this 指向
     storeActions[actionName] = function () {
       const afterList = [];
       const errorList = [];
       let res;
-      // 新增发布订阅
+
+      // 新增发布订阅: 添加 after 和 onError 的事件监听
+      const after = (cb) => afterList.push(cb);
+      const onError = (cb) => errorList.push(cb);
       subscription.trigger(actionList, { after, onError });
 
       try {
@@ -169,7 +173,7 @@ function createStoreActions(store, actions) {
         subscription.trigger(errorList, error);
       }
 
-      // 异步判断
+      // after 监听执行的异步判断
       if (res instanceof Promise) {
         return res
           .then((result) => {
@@ -179,17 +183,11 @@ function createStoreActions(store, actions) {
             subscription.trigger(errorList, e);
             return Promise.reject(e);
           });
+      } else {
+        subscription.trigger(afterList, res);
       }
 
-      subscription.trigger(afterList, res);
       return res;
-
-      function after(cb) {
-        afterList.push(cb);
-      }
-      function onError(cb) {
-        errorList.push(cb);
-      }
     };
   }
   return storeActions;

@@ -12,7 +12,7 @@ export default class Rubber extends BaseDrawTools {
     const noop = () => {};
     return {
       onmousedown: (e: MouseEvent) => {
-        const { clientX: x, clientY: y } = this.getClientPostion(e);
+        const { clientX: x, clientY: y } = this.getClientPosition(e);
         this.ctx.clearRect(
           x - this.size * 10,
           y - this.size * 10,
@@ -21,7 +21,7 @@ export default class Rubber extends BaseDrawTools {
         );
       },
       onmousemove: (e: MouseEvent) => {
-        const { clientX: x, clientY: y } = this.getClientPostion(e);
+        const { clientX: x, clientY: y } = this.getClientPosition(e);
         this.ctxBackup.setLineDash([0, 0]);
         this.ctxBackup.lineWidth = 1;
         this.clearContext();

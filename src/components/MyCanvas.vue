@@ -1,5 +1,5 @@
 <template>
-  <div class="wrap" style="max-width: 500px" ref="wrapRef">
+  <div class="wrap" :style="{ width: sizePx }" ref="wrapRef">
     <img ref="imgRef" src="../assets/img.jpg" />
     <canvas canvas ref="canvas" :style="state.style"></canvas>
     <canvas canvasBackup ref="canvasBackup" :style="state.style"></canvas>
@@ -10,17 +10,43 @@
       class="toolsBar"
     />
   </div>
+  <div>
+    <button @click="changeSize">改变大小</button>
+    <button @click="getImg">获取蒙版</button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { CSSProperties, onMounted, reactive, ref, watchEffect } from "vue";
+import {
+  CSSProperties,
+  computed,
+  nextTick,
+  onMounted,
+  reactive,
+  ref,
+  watch,
+  watchEffect,
+} from "vue";
 import ToolsBar from "./ToolsBar.vue";
 
-const ready = ref(false);
+const size = ref(500);
+const changeSize = () => {
+  size.value = size.value + 100;
+};
+const sizePx = computed(() => size.value + "px");
+
+watch(size, () => {
+  nextTick(() => handleResize());
+});
+
+/** 获取蒙版 */
+const getImg = () => {};
+
+const ready = ref<boolean>(false);
 const state = reactive<any>({
   canvas: null,
   canvasBackup: null,
-  style: { cursor: "auto", opacity: 1 },
+  style: { cursor: "auto", opacity: 0.5 },
 });
 
 const wrapRef = ref();
@@ -36,7 +62,7 @@ const setSzie = <T extends { width: number; height: number }>(
   return wrapper;
 };
 
-const handleResize = () => {
+const handleResize: () => Promise<boolean> = () => {
   return new Promise((resolve, reject) => {
     if (state.canvas && state.canvasBackup) {
       const size = {
