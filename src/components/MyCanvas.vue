@@ -52,7 +52,7 @@ const state = reactive<any>({
 const wrapRef = ref();
 const imgRef = ref();
 
-const setSzie = <T extends { width: number; height: number }>(
+const setSize = <T extends { width: number; height: number }>(
   wrapper: T,
   size: { width: number; height: number }
 ) => {
@@ -69,8 +69,8 @@ const handleResize: () => Promise<boolean> = () => {
         width: wrapRef.value.clientWidth,
         height: wrapRef.value.clientHeight,
       };
-      state.canvas = setSzie(state.canvas, size);
-      state.canvasBackup = setSzie(state.canvasBackup, size);
+      state.canvas = setSize(state.canvas, size);
+      state.canvasBackup = setSize(state.canvasBackup, size);
       resolve(true);
     } else {
       reject("canvas is not ready");

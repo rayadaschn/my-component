@@ -17,7 +17,7 @@ export default defineStore("todolist1", {
       this.todoList.unshift(todo);
     },
     toggleTodo(id) {
-      throw new Error("反转失败");
+      // throw new Error("反转失败");
 
       this.todoList = this.todoList.map((todo) => {
         if (todo.id === id) {

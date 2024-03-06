@@ -25,6 +25,9 @@
         <button @click="store.removeTodo(todo.id)">REMOVE</button>
       </li>
     </ul>
+
+    <button @click="dispose">$dispose</button>
+    <button @click="changeState">$state</button>
   </div>
 </template>
 
@@ -79,4 +82,21 @@ store.$onAction(({ after, onError }) => {
     console.log("error", err);
   });
 });
+
+const dispose = () => {
+  store.$dispose();
+};
+
+const changeState = () => {
+  store.$state = {
+    todoList: [
+      {
+        id: 5173,
+        content: "state demo",
+        completed: true,
+      },
+    ],
+    number: 999,
+  };
+};
 </script>

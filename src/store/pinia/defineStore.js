@@ -15,6 +15,8 @@ import {
   createSubscribe,
   createOnAction,
   actionList,
+  createDispose,
+  createState,
 } from "./api";
 
 // console.log("subscription", subscription);
@@ -82,7 +84,22 @@ function setStore(pinia, store, id, result, state) {
 
   Object.assign(store, result);
 
+  // 增加 $state 方法
+  createState(pinia, id);
+
+  // 创建完毕, 执行注册插件
+  runPlugins(pinia, store);
+
   return store;
+}
+
+function runPlugins(pinia, store) {
+  pinia.plugins.forEach((plugin) => {
+    const res = plugin({ store });
+    if (res) {
+      Object.assign(store, res);
+    }
+  });
 }
 
 function compliedSetup(pinia, id, setupStore) {
@@ -201,5 +218,6 @@ function createApis(pinia, id, scope) {
     $patch: createPatch(pinia, id),
     $subscribe: createSubscribe(pinia, id, scope),
     $onAction: createOnAction(),
+    $dispose: createDispose(pinia, id, scope),
   };
 }

@@ -6,9 +6,9 @@ import MyPinia from "./components/MyPinia/index.vue";
 
 <template>
   <!-- <HelloWorld /> -->
-  <MyCanvas />
+  <!-- <MyCanvas /> -->
 
-  <!-- <MyPinia /> -->
+  <MyPinia />
 </template>
 
 <style scoped>

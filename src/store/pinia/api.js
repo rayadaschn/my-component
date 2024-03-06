@@ -50,3 +50,27 @@ export function createOnAction() {
     subscription.add(actionList, cb);
   };
 }
+
+/**
+ * 停止收集依赖, 并从注册表中删除
+ * [$dispose](https://pinia.vuejs.org/api/interfaces/pinia._StoreWithState.html#-dispose)
+ */
+export function createDispose(pinia, id, scope) {
+  // 由 pinia 获取 store
+  return function $dispose() {
+    // 清空 action 监控数组
+    actionList.length = 0;
+    pinia.store.delete(id); // 清空, map 删除
+    scope.stop();
+  };
+}
+
+export function createState(pinia, id) {
+  const store = pinia.store.get(id); // map 查找
+
+  Object.defineProperty(store, "$state", {
+    get: () => pinia.state.value[id],
+    // Object.assign 这样不会丢失响应性
+    set: (newState) => store.$patch((state) => Object.assign(state, newState)),
+  });
+}
