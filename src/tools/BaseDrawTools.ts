@@ -158,9 +158,27 @@ export default abstract class BaseDrawTools {
   }
 
   output(format: "png" | "jpeg" | "webp") {
+    const enlargedCanvas = document.createElement("canvas");
+    const enlargedCtx = enlargedCanvas.getContext("2d");
+    const scaleFactor = 2; // 放大倍数，您可以根据需要调整
+    enlargedCanvas.width = this.canvas.width * scaleFactor;
+    enlargedCanvas.height = this.canvas.height * scaleFactor;
+    enlargedCtx.drawImage(
+      this.canvas,
+      0,
+      0,
+      this.canvas.width,
+      this.canvas.height,
+      0,
+      0,
+      enlargedCanvas.width,
+      enlargedCanvas.height
+    );
+
     const a = document.createElement("a");
     const ext = format || "webp";
-    a.href = this.canvas.toDataURL(`image/${ext}`, 1);
+    a.href = enlargedCanvas.toDataURL("image/png", 1.0);
+    // a.href = this.canvas.toDataURL(`image/${ext}`, 1);
     if (format === "jpeg") {
       const canvas = document.createElement("canvas");
       canvas.width = this.canvas.width;
