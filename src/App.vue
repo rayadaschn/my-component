@@ -2,7 +2,7 @@
 import HelloWorld from "./components/HelloWorld.vue";
 import MyCanvas from "./components/MyCanvas.vue";
 import MyPinia from "./components/MyPinia/index.vue";
-import MySesium from "./components/MyCesium/index.vue";
+import MyRouter from "./components/MyRouter/index.vue";
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import MySesium from "./components/MyCesium/index.vue";
 
   <!-- <MyPinia /> -->
 
-  <MySesium />
+  <MyRouter />
 </template>
 
 <style scoped></style>
